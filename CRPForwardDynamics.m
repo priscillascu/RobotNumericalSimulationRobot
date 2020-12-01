@@ -50,7 +50,7 @@ global thetalist
 global dthetalist
 global ddthetalist
 % 仿真步长
-dt = 0.00001;
+dt = 0.001;
 % 驱动力矩
 taulist = u( 1: 6 );
 
@@ -183,17 +183,11 @@ S6 = [0
      
 Slist = [S1, S2, S3, S4, S5, S6];
 
-ddthetalist = ForwardDynamics(thetalist, dthetalist, taulist, g, Ftip, Mlist, Glist, Slist);
-
-% 四阶龙格库塔法求积分
-h = dt;
-k1 = ddthetalist;
-k2 = ForwardDynamics(thetalist + dt/2, dthetalist + dt/2 .* k1, taulist, g, Ftip, Mlist, Glist, Slist);
-k3 = ForwardDynamics(thetalist + dt/2, dthetalist + dt/2 .* k2, taulist, g, Ftip, Mlist, Glist, Slist);
-k4 = ForwardDynamics(thetalist + dt/2, dthetalist + dt/2 .* k3, taulist, g, Ftip, Mlist, Glist, Slist);
-dthetalist = dthetalist + (k1 + 2*k2 + 2*k3 + k4)*h/6;
-
-thetalist = thetalist + dthetalist .* dt;
+intRes = 20;
+for j = 1: intRes
+   ddthetalist = ForwardDynamics(thetalist, dthetalist, taulist, g, Ftip, Mlist, Glist, Slist);     
+   [thetalist, dthetalist] = EulerStep(thetalist, dthetalist,  ddthetalist, dt / intRes);
+end
 
 sys(1) = thetalist(1);
 sys(2) = thetalist(2);
